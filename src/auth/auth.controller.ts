@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseInterceptors, UploadedFile, NotFoundException, InternalServerErrorException, BadRequestException, ConflictException, HttpCode } from '@nestjs/common';
+import { Controller, Post, Body, UseInterceptors, UploadedFile, NotFoundException, InternalServerErrorException, BadRequestException, ConflictException, HttpCode, ForbiddenException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -12,7 +12,7 @@ import { ResendOTPDto } from './dto/ResendOTPDto';
 import { activeMessage, forgetPasswordMessage, otpHtml } from 'src/libs/mail';
 import { ForgetPasswordDto } from './dto/ForgetPasswordDto';
 import { ResetPasswordDto } from './dto/ResetPasswordDto';
-import { ApiConsumes, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiConsumes } from '@nestjs/swagger';
 import { ActiveAccountDto } from './dto/activeAccount-dto';
 
 @Controller('auth')
@@ -119,13 +119,12 @@ export class AuthController {
 
     const user = await this.authService.findByEmail(decoded.email)
 
+    if (!user) {
+      throw new NotFoundException("User not found!")
+    }
 
     if (user.status === UserStatus.ACTIVE) {
       throw new BadRequestException("User already active")
-    }
-
-    if (!user) {
-      throw new NotFoundException("User not found!")
     }
 
     if (user.activeCode !== token) {
@@ -172,10 +171,17 @@ export class AuthController {
       throw new BadRequestException("Please activate your account");
     }
 
+    if (user.blockUntil && user.blockUntil > new Date()) {
+      const remainingTime = Math.ceil((user.blockUntil.getTime() - new Date().getTime()) / 1000);
+      const minutes = Math.floor(remainingTime / 60);
+      const seconds = remainingTime % 60;
+      throw new ForbiddenException(`Account is locked, please try again in ${minutes} minutes and ${seconds} seconds`);
+    }
 
     const isPasswordValid = await this.authService.comparePassword(password, user.password);
 
     if (!isPasswordValid) {
+      await this.authService.handleFieldAttempt(user);
       throw new BadRequestException("Invalid Credentials!");
     } else {
 
@@ -192,6 +198,8 @@ export class AuthController {
         //   text: "OTP Code",
         //   html: html,
         // })
+
+        await this.authService.resetFailedAttempts(user)
 
         return {
           success: true,

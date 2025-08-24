@@ -22,6 +22,25 @@ export class AuthService {
         private readonly mailerService: MailerService
     ) { }
 
+    LOCK_TIME = 15 * 60 * 1000;
+
+    async handleFieldAttempt(user: User) {
+        user.failedAttempts += 1;
+
+
+        if (user.failedAttempts >= 3) {
+            user.blockUntil = new Date(Date.now() + this.LOCK_TIME);
+            user.failedAttempts = 0;
+        }
+
+        await this.usersRepository.save(user);
+    }
+
+    async resetFailedAttempts(user: User) {
+        user.failedAttempts = 0;
+        user.blockUntil = null;
+        await this.usersRepository.save(user);
+    }
 
     async findByEmail(email: string) {
         const user = await this.usersRepository.findOneBy({ email })

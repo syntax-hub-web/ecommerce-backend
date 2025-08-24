@@ -69,4 +69,10 @@ export class User {
 
     @Column({ type: 'timestamptz', nullable: true })
     lastLogin: Date;
+
+    @Column({ default: 0 })
+    failedAttempts: number;
+
+    @Column({ type: 'timestamp', nullable: true })
+    blockUntil: Date | null
 }

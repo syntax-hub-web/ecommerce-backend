@@ -20,4 +20,8 @@ export class UsersController {
       throw new InternalServerErrorException(error?.message || "Internal server error");
     }
   }
+
+  async delete() {
+
+  }
 }

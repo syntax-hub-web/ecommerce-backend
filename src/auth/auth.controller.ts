@@ -251,6 +251,7 @@ export class AuthController {
       await this.authService.updateUserOtp(user.id.toString(), null, null)
 
       user.lastLogin = new Date();
+
       await this.authService.updateUserLastLogin(user);
 
       const token = await this.authService.generateToken({ email: user.email, lastLogin: user.lastLogin.getTime() }, SECRET_KEY, '3h')

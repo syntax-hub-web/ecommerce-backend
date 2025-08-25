@@ -7,15 +7,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class RolesService {
+  constructor(
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>,
+  ) {}
 
-    constructor(
-        @InjectRepository(Role)
-        private readonly roleRepository: Repository<Role>) { }
-
-
-    async findAll() {
-        return this.roleRepository.find()
-    }
-
+  async findAll() {
+    const roles = await this.roleRepository
+      .createQueryBuilder('role')
+      .where('role.name IN (:...names)', { names: ['user', 'seller'] })
+      .getMany();
+    return roles;
+  }
 }
-

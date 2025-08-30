@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Delete,
   ForbiddenException,
@@ -6,8 +7,11 @@ import {
   InternalServerErrorException,
   NotFoundException,
   Param,
+  Put,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from 'src/guards/auth.guard';
@@ -15,6 +19,12 @@ import { UserQueryDto } from './dto/userQueryDto';
 import { UserRole } from 'src/libs/enums';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { User } from './entities/user.entity';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { ApiConsumes } from '@nestjs/swagger';
+import { multerConfig } from 'src/config/multer.config';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UpdateSellerDto } from './dto/seller.dto';
+import { UpdateUserAndSellerDto } from './dto/user-seller-dto';
 
 @Controller('users')
 export class UsersController {
@@ -65,6 +75,36 @@ export class UsersController {
     };
   }
 
+
+  // @Put(':id')
+  // @UseGuards(JwtAuthGuard)
+  // @ApiConsumes('multipart/form-data')
+  // @UseInterceptors(FileInterceptor('avatar', multerConfig))
+  // async update(
+  //   @Param('id') id: string,
+  //   @Body() body: UpdateUserAndSellerDto,
+  //   @UploadedFile() file?: Express.Multer.File
+  // ) {
+  //   if (file && body.user) {
+  //     body.user.avatar = `/uploads/${file.filename}`;
+  //   }
+
+  //   if (body.user) {
+  //     await this.usersService.update(id, body.user);
+  //   }
+
+  //   if (body.seller) {
+  //     await this.usersService.updateSeller(id, body.seller);
+  //   }
+
+  //   const updatedUser = await this.usersService.findOne(id);
+  //   return {
+  //     success: true,
+  //     message: 'User updated successfully',
+  //     data: updatedUser,
+  //   };
+  // }
+
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   async delete(@Param('id') id: string, @CurrentUser() currentUser: User,
@@ -95,4 +135,6 @@ export class UsersController {
       );
     }
   }
+
+
 }

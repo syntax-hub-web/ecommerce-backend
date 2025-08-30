@@ -10,6 +10,8 @@ import {
   ConflictException,
   HttpCode,
   ForbiddenException,
+  Get,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
@@ -26,6 +28,8 @@ import { ForgetPasswordDto } from './dto/ForgetPasswordDto';
 import { ResetPasswordDto } from './dto/ResetPasswordDto';
 import { ApiConsumes } from '@nestjs/swagger';
 import { ActiveAccountDto } from './dto/activeAccount-dto';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { JwtAuthGuard } from 'src/guards/auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -572,4 +576,15 @@ export class AuthController {
       );
     }
   }
+
+  @Get('current-user')
+  @UseGuards(JwtAuthGuard)
+  async currentUser(@CurrentUser() currentUser: User) {
+    return {
+      status: true,
+      message: 'Current user returned successfully',
+      data: { user: currentUser },
+    };
+  }
+
 }

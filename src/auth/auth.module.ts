@@ -12,5 +12,6 @@ import { Seller } from './entities/seller.entity';
   imports: [UsersModule, RolesModule, TypeOrmModule.forFeature([User, Role, Seller])],
   controllers: [AuthController],
   providers: [AuthService],
+  exports: [TypeOrmModule]
 })
 export class AuthModule { }

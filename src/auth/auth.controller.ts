@@ -29,7 +29,7 @@ import { ActiveAccountDto } from './dto/activeAccount-dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Post('register')
   @ApiConsumes('multipart/form-data')
@@ -38,10 +38,15 @@ export class AuthController {
     @Body() createAuthDto: CreateAuthDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    const userByEmail = await this.authService.findByEmail(createAuthDto.email);
-    const userByPhone = await this.authService.findByPhone(createAuthDto.phone);
 
-    if (userByEmail || userByPhone) {
+    let user: User | null;
+
+    if (createAuthDto.email) {
+      user = await this.authService.findByEmail(createAuthDto.email);
+    } else {
+      user = await this.authService.findByPhone(createAuthDto.phone);
+    }
+    if (user) {
       if (file) {
         await fs.unlink(file.path);
       }
@@ -133,6 +138,8 @@ export class AuthController {
     }
 
     const user = await this.authService.findByEmail(decoded.email);
+
+
 
     if (!user) {
       throw new NotFoundException('User not found!');

@@ -20,7 +20,7 @@ export class AuthService {
     @InjectRepository(Seller)
     private readonly sellerRepository: Repository<Seller>,
     private readonly mailerService: MailerService,
-  ) {}
+  ) { }
 
   LOCK_TIME = 15 * 60 * 1000;
 
@@ -43,12 +43,13 @@ export class AuthService {
   }
 
   async findByEmail(email: string) {
-    const user = await this.usersRepository.findOneBy({ email });
+    const user = await this.usersRepository.findOne({ where: { email, isDeleted: false } });
     return user;
   }
 
+
   async findByPhone(phone: string) {
-    const user = await this.usersRepository.findOneBy({ phone });
+    const user = await this.usersRepository.findOne({ where: { phone, isDeleted: false } });
     return user;
   }
 

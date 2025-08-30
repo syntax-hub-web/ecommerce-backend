@@ -24,10 +24,10 @@ export class User {
     @Column({ name: 'last_name' })
     lastName: string;
 
-    @Column({ unique: true })
+    @Column({ unique: false })
     email: string;
 
-    @Column({ unique: true, nullable: true })
+    @Column({ unique: false, nullable: true })
     phone: string;
 
     @Column({ type: 'text', nullable: true })
@@ -60,6 +60,9 @@ export class User {
 
     @Column()
     password: string;
+
+    @Column({ default: false })
+    isDeleted: boolean;
 
     @CreateDateColumn({ name: 'created_at' })
     createdAt: Date;

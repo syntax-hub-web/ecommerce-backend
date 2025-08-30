@@ -27,7 +27,6 @@ async function bootstrap() {
     }),
   );
 
-
   // PostgreSQL connection
   const dataSource = app.get(DataSource);
   if (!dataSource.isInitialized) {
